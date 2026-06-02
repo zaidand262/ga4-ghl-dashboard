@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GA4 Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; background:#f7f7f9; color:#222; }
+    h1 { margin-bottom: 20px; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:24px; }
+    .card { background:#fff; border-radius:12px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .card h3 { margin:0 0 8px; font-size:14px; color:#666; }
+    .card .value { font-size:28px; font-weight:700; }
+    .section { background:#fff; border-radius:12px; padding:16px; margin-bottom:24px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    table { width:100%; border-collapse:collapse; }
+    th, td { text-align:left; padding:10px; border-bottom:1px solid #eee; font-size:14px; }
+    canvas { max-height:320px; }
+  </style>
+</head>
+<body>
+  <h1>GA4 Website Dashboard</h1>
+
+  <div class="grid">
+    <div class="card"><h3>Active Users</h3><div class="value" id="activeUsers">-</div></div>
+    <div class="card"><h3>Sessions</h3><div class="value" id="sessions">-</div></div>
+    <div class="card"><h3>New Users</h3><div class="value" id="newUsers">-</div></div>
+    <div class="card"><h3>Page Views</h3><div class="value" id="pageViews">-</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Sessions Trend</h2>
+    <canvas id="trendChart"></canvas>
+  </div>
+
+  <div class="section">
+    <h2>Sessions by Channel</h2>
+    <canvas id="channelChart"></canvas>
+  </div>
+
+  <div class="section">
+    <h2>Top Pages</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Page Path</th>
+          <th>Views</th>
+        </tr>
+      </thead>
+      <tbody id="topPagesBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+
+    async function getJson(path) {
+      const res = await fetch(API_BASE + path);
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+
+    async function loadSummary() {
+      const data = await getJson("/api/summary");
+      document.getElementById("activeUsers").textContent = Number(data.activeUsers).toLocaleString();
+      document.getElementById("sessions").textContent = Number(data.sessions).toLocaleString();
+      document.getElementById("newUsers").textContent = Number(data.newUsers).toLocaleString();
+      document.getElementById("pageViews").textContent = Number(data.pageViews).toLocaleString();
+    }
+
+    async function loadTrend() {
+      const data = await getJson("/api/trend");
+      new Chart(document.getElementById("trendChart"), {
+        type: "line",
+        data: {
+          labels: data.map(x => x.date),
+          datasets: [{
+            label: "Sessions",
+            data: data.map(x => Number(x.sessions)),
+            borderColor: "#2563eb",
+            backgroundColor: "rgba(37,99,235,0.15)",
+            fill: true,
+            tension: 0.3
+          }]
+        }
+      });
+    }
+
+    async function loadChannels() {
+      const data = await getJson("/api/channels");
+      new Chart(document.getElementById("channelChart"), {
+        type: "bar",
+        data: {
+          labels: data.map(x => x.sessionDefaultChannelGroup),
+          datasets: [{
+            label: "Sessions",
+            data: data.map(x => Number(x.sessions)),
+            backgroundColor: "#14b8a6"
+          }]
+        }
+      });
+    }
+
+    async function loadTopPages() {
+      const data = await getJson("/api/top-pages");
+      const tbody = document.getElementById("topPagesBody");
+      tbody.innerHTML = data.map(row => `
+        <tr>
+          <td>${row.pagePath}</td>
+          <td>${Number(row.screenPageViews).toLocaleString()}</td>
+        </tr>
+      `).join("");
+    }
+
+    async function init() {
+      try {
+        await Promise.all([loadSummary(), loadTrend(), loadChannels(), loadTopPages()]);
+      } catch (e) {
+        document.body.insertAdjacentHTML("beforeend", `<p style="color:red;">${e.message}</p>`);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
