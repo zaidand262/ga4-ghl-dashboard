@@ -4,6 +4,7 @@ const {
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     GOOGLE_REFRESH_TOKEN,
+    GOOGLE_REDIRECT_URI,
     GA4_PROPERTY_ID
 } = process.env;
 
@@ -13,7 +14,8 @@ if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REFRESH_TOKEN || !GA4_
 
 const oauth2Client = new google.auth.OAuth2(
     GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET
+    GOOGLE_CLIENT_SECRET,
+    GOOGLE_REDIRECT_URI
 );
 
 oauth2Client.setCredentials({
@@ -32,15 +34,15 @@ export async function runReport({
     const accessToken = accessTokenResponse?.token;
 
     const res = await fetch(
-        'https://analyticsdata.googleapis.com/v1beta/properties/${GA4_PROPERTY_ID}:runReport',
+        "https://analyticsdata.googleapis.com/v1beta/properties/${GA4_PROPERTY_ID}:runReport",
         {
             method:"POST",
-            header:{
-                Authorization:'Bearer ${accessToken}',
+            headers:{
+                Authorization:"Bearer ${accessToken}",
                 "Content-Type":"application/json"
             },
             body: JSON.stringify({
-                dateRanges:[(startDate,endDate)],
+                dateRanges:[{startDate,endDate}],
                 dimensions:dimensions.map((name) => ({name})),
                 metrics: metrics.map((name) => ({name})),
                 limit,
