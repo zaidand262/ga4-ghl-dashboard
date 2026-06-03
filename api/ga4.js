@@ -32,7 +32,7 @@ export async function runReport({
     const accessToken = accessTokenResponse?.token;
 
     const res = await fetch(
-        'http://analyticsdata.googleapis.com/v1beta/properties/${GA4_PROPERTY_ID}:runReport',
+        'https://analyticsdata.googleapis.com/v1beta/properties/${GA4_PROPERTY_ID}:runReport',
         {
             method:"POST",
             header:{
@@ -51,7 +51,7 @@ export async function runReport({
 
     if(!res.ok){
         const err = await res.text();
-        throw new Error('GA4 API error: $(err)');
+        throw new Error('GA4 API error: ${err}');
     }
 
     return await res.json();

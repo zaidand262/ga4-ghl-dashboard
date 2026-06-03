@@ -1,4 +1,4 @@
-import {runReport} from "./_lib/ga4.js";
+import {runReport} from "./ga4.js";
 
 export default async function handler(req, res){
     try{
