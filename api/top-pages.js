@@ -11,8 +11,8 @@ export default async function handler(req, res)
             limit: Number(req.query.limit || 10),
             orderBys: [
                 {
-                    metrics: {metricName:"sreenPageViews"},
-                    dec: true
+                    metric: {metricName:"sreenPageViews"},
+                    desc: true
                 }
             ]
         });
