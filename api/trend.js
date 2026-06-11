@@ -8,7 +8,13 @@ export default async function handler(req, res)
             metrics: ["sessions"],
             startDate: req.query.startDate || "14daysAgo",
             endDate: req.query.endDate || "today",
-            limit: 100
+            limit: 100,
+            orderBys: [
+                {
+                    dimension: {dimensionName: "date"},
+                    desc: false
+                }
+            ]
         });
 
         res.status(200).json(mapRows(report));
