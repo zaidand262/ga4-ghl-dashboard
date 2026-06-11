@@ -4,7 +4,7 @@ export default async function handler(req, res){
     try{
         const report = await runReport({
             metrics: ["activeUsers","sessions","newUsers","screenPageViews"],
-            startDate: req.query.startDate || "30daysAgo",
+            startDate: req.query.startDate || "14daysAgo",
             endDate: req.query.endDate || "today"
         });
 

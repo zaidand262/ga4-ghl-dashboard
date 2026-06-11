@@ -25,7 +25,7 @@ oauth2Client.setCredentials({
 export async function runReport({
     dimensions = [],
     metrics = [],
-    startDate = "30daysAgo",
+    startDate = "14daysAgo",
     endDate = "today",
     limit = 10,
     orderBys = []
